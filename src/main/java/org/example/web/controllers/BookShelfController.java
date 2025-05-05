@@ -7,10 +7,7 @@ import org.example.web.dto.Book;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping(value = "books")
@@ -33,19 +30,49 @@ public class BookShelfController {
     }
 
     @PostMapping("/save")
-    public String saveBook(Book book){
+    public String saveBook(@ModelAttribute Book book, Model model) {
+        // Проверяем, что хотя бы одно поле не пустое
+        if (isEmpty(book)) {
+            model.addAttribute("error", "Please fill in at least one field!");
+            return "redirect:/books/shelf"; // Возвращаем на страницу с ошибкой
+        }
+
+        // Сохраняем книгу, если проверка прошла успешно
         bookService.saveBook(book);
-        logger.info("current repository size: "+bookService.getAllBooks().size());
-        return "redirect:/shelf";
+        return "redirect:/books/shelf"; // Перенаправляем на страницу с книгами
     }
 
+    // Метод для проверки, что хотя бы одно поле заполнено
+    private boolean isEmpty(Book book) {
+        return (book.getAuthor() == null || book.getAuthor().trim().isEmpty())
+                && (book.getTitle() == null || book.getTitle().trim().isEmpty())
+                && (book.getSize() == null || book.getSize().trim().isEmpty());
+    }
+
+
     @PostMapping("/remove")
-    public String removeBook(@RequestParam(value = "bookIdToRemove") Integer bookIdToRemove){
-        if(bookService.removeBookById(bookIdToRemove)){
+    public String removeBook(@RequestParam(value = "bookIdToRemove") Integer bookIdToRemove) {
+        if (bookService.removeBookById(bookIdToRemove)) {
+            // Если книга удалена, перенаправляем на ту же страницу
             return "redirect:/books/shelf";
-        } else{
+        } else {
+            // Возвращаемся на страницу книги
+            return "redirect:/books/shelf";
+        }
+    }
+
+    @PostMapping("/removeByRegex")
+    public String removeBooksByRegex(@RequestParam("queryRegex") String queryRegex, Model model) {
+        if (queryRegex == null || queryRegex.trim().isEmpty()) {
+            model.addAttribute("error", "Regex cannot be empty.");
             return "book_shelf";
         }
 
+        int removedCount = bookService.removeBooksByRegex(queryRegex);
+
+        model.addAttribute("message", removedCount + " book(s) removed matching the regex.");
+        return "redirect:/books/shelf";
     }
+
+
 }

@@ -31,12 +31,14 @@ public class BookRepository<T> implements ProjectRepository<Book>, ApplicationCo
 
     @Override
     public boolean removeItemById(String bookIdToRemove) {
+        // Проверяем, существует ли книга с таким ID
         for (Book book : retreiveAll()) {
-            if (book.getId().equals(bookIdToRemove)) {
+            if (book.getId().equals(Integer.valueOf(bookIdToRemove))) {
                 logger.info("remove book completed: " + book);
-                return repo.remove(book);
+                return repo.remove(book); // Удаляем книгу
             }
         }
+        // Если книга не найдена, возвращаем false
         return false;
     }
 

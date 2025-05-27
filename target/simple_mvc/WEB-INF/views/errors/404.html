@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Custom 404</title>
@@ -8,6 +8,7 @@
 <h1>
     Custom Bookshelf 404 Error Page
 </h1>
-<a href="./login">Back to login page</a>
+<p th:text="${errorMessage}"></p>
+<a href="/simple_mvc_war_exploded/login">Back to login page</a>
 </body>
 </html>

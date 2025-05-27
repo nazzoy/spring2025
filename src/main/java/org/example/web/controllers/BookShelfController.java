@@ -4,6 +4,7 @@ package org.example.web.controllers;
 import org.apache.log4j.Logger;
 import org.example.app.services.BookService;
 import org.example.web.dto.Book;
+import org.example.web.dto.BookIdToRemove;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,6 +26,7 @@ public class BookShelfController {
     public String books(Model model) {
         logger.info("got book shelf");
         model.addAttribute("book", new Book());
+        model.addAttribute("bookIdToRemove", new BookIdToRemove());
         model.addAttribute("bookList", bookService.getAllBooks());
         return "book_shelf";
     }
@@ -50,14 +52,25 @@ public class BookShelfController {
     }
 
 
+//    @PostMapping("/remove")
+//    public String removeBook(@RequestParam(value = "bookIdToRemove") Integer bookIdToRemove) {
+//        if (bookService.removeBookById(bookIdToRemove)) {
+//            // Если книга удалена, перенаправляем на ту же страницу
+//            return "redirect:/books/shelf";
+//        } else {
+//            // Возвращаемся на страницу книги
+//            return "redirect:/books/shelf";
+//        }
+//    }
+
     @PostMapping("/remove")
-    public String removeBook(@RequestParam(value = "bookIdToRemove") Integer bookIdToRemove) {
-        if (bookService.removeBookById(bookIdToRemove)) {
+    public String removeBook(BookIdToRemove bookIdToRemove) {
+        if (bookService.removeBookById(bookIdToRemove.getId())) {
             // Если книга удалена, перенаправляем на ту же страницу
             return "redirect:/books/shelf";
         } else {
             // Возвращаемся на страницу книги
-            return "redirect:/books/shelf";
+            return "book_shelf";
         }
     }
 

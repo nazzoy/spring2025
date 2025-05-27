@@ -34,7 +34,7 @@ public class BookService {
                 && (book.getSize() == null || book.getSize().trim().isEmpty());
     }
 
-    public boolean removeBookById(Integer bookIdToRemove) {
+    public boolean removeBookById(String bookIdToRemove) {
         return bookRepo.removeItemById(String.valueOf(bookIdToRemove));
     }
 

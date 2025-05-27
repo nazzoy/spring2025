@@ -44,5 +44,9 @@ public class LoginController {
         }
     }
 
-
+    @ExceptionHandler(BookShelfLoginException.class)
+    public String handleError(Model model, BookShelfLoginException exception) {
+        model.addAttribute("errorMessage", exception.getMessage());
+        return "errors/404";
+    }
 }

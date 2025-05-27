@@ -17,8 +17,8 @@ import javax.validation.Valid;
 @RequestMapping(value = "books")
 public class BookShelfController {
 
-    private Logger logger = Logger.getLogger(BookShelfController.class);
-    private BookService bookService;
+    private final Logger logger = Logger.getLogger(BookShelfController.class);
+    private final BookService bookService;
 
     @Autowired
     public BookShelfController(BookService bookService) {
@@ -35,24 +35,35 @@ public class BookShelfController {
     }
 
     @PostMapping("/save")
-    public String saveBook(@ModelAttribute Book book, Model model) {
-        // Проверяем, что хотя бы одно поле не пустое
-        if (isEmpty(book)) {
-            model.addAttribute("error", "Please fill in at least one field!");
-            return "redirect:/books/shelf"; // Возвращаем на страницу с ошибкой
+    public String saveBook(@Valid Book book, BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("book", book);
+            model.addAttribute("bookIdToRemove", new BookIdToRemove());
+            model.addAttribute("bookList", bookService.getAllBooks());
+            return "book_shelf";
+        } else {
+            bookService.saveBook(book);
+            logger.info("current repository size: " + bookService.getAllBooks().size());
+            return "redirect:/books/shelf";
         }
-
-        // Сохраняем книгу, если проверка прошла успешно
-        bookService.saveBook(book);
-        return "redirect:/books/shelf"; // Перенаправляем на страницу с книгами
     }
+        // Проверяем, что хотя бы одно поле не пустое
+//        if (isEmpty(book)) {
+//            model.addAttribute("error", "Please fill in at least one field!");
+//            return "redirect:/books/shelf"; // Возвращаем на страницу с ошибкой
+//        }
+//
+//        // Сохраняем книгу, если проверка прошла успешно
+//        bookService.saveBook(book);
+//        return "redirect:/books/shelf"; // Перенаправляем на страницу с книгами
+//    }
 
     // Метод для проверки, что хотя бы одно поле заполнено
-    private boolean isEmpty(Book book) {
-        return (book.getAuthor() == null || book.getAuthor().trim().isEmpty())
-                && (book.getTitle() == null || book.getTitle().trim().isEmpty())
-                && (book.getSize() == null || book.getSize().trim().isEmpty());
-    }
+//    private boolean isEmpty(Book book) {
+//        return (book.getAuthor() == null || book.getAuthor().trim().isEmpty())
+//                && (book.getTitle() == null || book.getTitle().trim().isEmpty())
+//                && (book.getSize() == null || book.getSize().trim().isEmpty());
+//    }
 
 
 //    @PostMapping("/remove")

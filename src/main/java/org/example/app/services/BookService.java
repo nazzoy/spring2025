@@ -31,7 +31,7 @@ public class BookService {
     private boolean isEmpty(Book book) {
         return (book.getAuthor() == null || book.getAuthor().trim().isEmpty())
                 && (book.getTitle() == null || book.getTitle().trim().isEmpty())
-                && (book.getSize() == null || book.getSize().trim().isEmpty());
+                ;
     }
 
     public boolean removeBookById(String bookIdToRemove) {

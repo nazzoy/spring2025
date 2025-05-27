@@ -8,7 +8,10 @@ import org.example.web.dto.BookIdToRemove;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @Controller
 @RequestMapping(value = "books")
@@ -64,13 +67,14 @@ public class BookShelfController {
 //    }
 
     @PostMapping("/remove")
-    public String removeBook(BookIdToRemove bookIdToRemove) {
-        if (bookService.removeBookById(bookIdToRemove.getId())) {
-            // Если книга удалена, перенаправляем на ту же страницу
-            return "redirect:/books/shelf";
-        } else {
-            // Возвращаемся на страницу книги
+    public String removeBook(@Valid BookIdToRemove bookIdToRemove, BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("book", new Book());
+            model.addAttribute("bookList", bookService.getAllBooks());
             return "book_shelf";
+        } else {
+            bookService.removeBookById(bookIdToRemove.getId());
+            return "redirect:/books/shelf";
         }
     }
 

@@ -1,7 +1,9 @@
 package org.example.web.dto;
 
-public class BookIdToRemove {
+import javax.validation.constraints.NotEmpty;
 
+public class BookIdToRemove {
+    @NotEmpty
     private String id;
 
     public String getId() {

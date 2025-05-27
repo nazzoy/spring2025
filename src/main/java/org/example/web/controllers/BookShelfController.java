@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.example.app.services.BookService;
 import org.example.web.dto.Book;
 import org.example.web.dto.BookIdToRemove;
+import org.example.web.dto.BookRegexQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,6 +31,7 @@ public class BookShelfController {
         logger.info("got book shelf");
         model.addAttribute("book", new Book());
         model.addAttribute("bookIdToRemove", new BookIdToRemove());
+        model.addAttribute("bookRegexQuery", new BookRegexQuery());
         model.addAttribute("bookList", bookService.getAllBooks());
         return "book_shelf";
     }
@@ -47,40 +49,12 @@ public class BookShelfController {
             return "redirect:/books/shelf";
         }
     }
-        // Проверяем, что хотя бы одно поле не пустое
-//        if (isEmpty(book)) {
-//            model.addAttribute("error", "Please fill in at least one field!");
-//            return "redirect:/books/shelf"; // Возвращаем на страницу с ошибкой
-//        }
-//
-//        // Сохраняем книгу, если проверка прошла успешно
-//        bookService.saveBook(book);
-//        return "redirect:/books/shelf"; // Перенаправляем на страницу с книгами
-//    }
-
-    // Метод для проверки, что хотя бы одно поле заполнено
-//    private boolean isEmpty(Book book) {
-//        return (book.getAuthor() == null || book.getAuthor().trim().isEmpty())
-//                && (book.getTitle() == null || book.getTitle().trim().isEmpty())
-//                && (book.getSize() == null || book.getSize().trim().isEmpty());
-//    }
-
-
-//    @PostMapping("/remove")
-//    public String removeBook(@RequestParam(value = "bookIdToRemove") Integer bookIdToRemove) {
-//        if (bookService.removeBookById(bookIdToRemove)) {
-//            // Если книга удалена, перенаправляем на ту же страницу
-//            return "redirect:/books/shelf";
-//        } else {
-//            // Возвращаемся на страницу книги
-//            return "redirect:/books/shelf";
-//        }
-//    }
 
     @PostMapping("/remove")
     public String removeBook(@Valid BookIdToRemove bookIdToRemove, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("book", new Book());
+            model.addAttribute("bookRegexQuery", new BookRegexQuery());
             model.addAttribute("bookList", bookService.getAllBooks());
             return "book_shelf";
         } else {
@@ -90,17 +64,28 @@ public class BookShelfController {
     }
 
     @PostMapping("/removeByRegex")
-    public String removeBooksByRegex(@RequestParam("queryRegex") String queryRegex, Model model) {
-        if (queryRegex == null || queryRegex.trim().isEmpty()) {
-            model.addAttribute("error", "Regex cannot be empty.");
+    public String removeBooksByRegex(@Valid BookRegexQuery regexQuery,
+                                     BindingResult bindingResult,
+                                     Model model) {
+        if (!bindingResult.hasErrors()) {
+            int removedCount = bookService.removeBooksByRegex(regexQuery.getQueryRegex());
+
+            if (removedCount == 0) {
+                bindingResult.rejectValue("queryRegex", "notfound", "No books match the given regex.");
+            }
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("book", new Book());
+            model.addAttribute("bookIdToRemove", new BookIdToRemove());
+            model.addAttribute("bookRegexQuery", regexQuery); // важно вернуть то, что вводили
+            model.addAttribute("bookList", bookService.getAllBooks());
             return "book_shelf";
         }
 
-        int removedCount = bookService.removeBooksByRegex(queryRegex);
-
-        model.addAttribute("message", removedCount + " book(s) removed matching the regex.");
         return "redirect:/books/shelf";
     }
+
 
 
 }
